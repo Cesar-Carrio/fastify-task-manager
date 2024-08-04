@@ -1,33 +1,44 @@
-import fastify, { FastifyPluginAsync } from "fastify";
-import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
 import Swagger from "@fastify/swagger";
 import SwaggerUI from "@fastify/swagger-ui";
 import Helmet from "@fastify/helmet";
 
+import Autoload, { AutoloadPluginOptions } from "@fastify/autoload";
+import { FastifyPluginAsync } from "fastify";
+import fp from "fastify-plugin";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
+// Importing plugins
+import envPlugin from "./plugins/env.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+export type AppOptions = {
+  // Place my custom options for below here
+} & Partial<AutoloadPluginOptions>;
 
-const server = fastify({
-  logger: true,
-});
+// pass --options via CLI args in command to enable these options.
+// const options: AppOptions = {};
 
-server.register(Swagger);
-server.register(SwaggerUI);
-server.register(Helmet, { global: true });
+const app: FastifyPluginAsync<AppOptions> = async (
+  fastify,
+  opts,
+): Promise<void> => {
+  // this loads up config vars from the env, run this first
+  await fastify.register(envPlugin);
+  fastify.register(Swagger);
+  fastify.register(SwaggerUI);
+  fastify.register(Helmet, { global: true });
 
-server.register(AutoLoad, {
-  dir: join(__dirname, "./routes"),
-  dirNameRoutePrefix: false,
-});
+  // Load all plugins in the plugins directory
+  void fastify.register(Autoload, {
+    dir: join(__dirname, "plugins"),
+    options: opts,
+    forceESM: true,
+    maxDepth: 1,
+    // Exclude env plugin b/c it was loaded earlier
+    ignorePattern: /env.(j|t)s$/,
+  });
+};
 
-server.listen({ port: 3000 }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-
-  console.log(`Sever listening at ${address}`);
-});
+export default fp(app);

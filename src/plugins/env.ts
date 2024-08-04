@@ -6,22 +6,35 @@ declare module "fastify" {
   export interface FastifyInstance {
     config: {
       PORT: number;
+      HTTP_HOST: string;
+      API_KEY: string;
+      DEBUG_LEVEL: string;
     };
   }
 }
 
 export const schema = {
   type: "object",
-  required: ["PORT"],
+  required: ["PORT", "HTTP_HOST"],
   properties: {
     PORT: {
       type: "number",
       default: 3000,
     },
+    HTTP_HOST: {
+      type: "string",
+      default: "0.0.0.0",
+    },
+    API_KEY: {
+      type: "string",
+    },
+    DEBUG_LEVEL: {
+      type: "string",
+    },
   },
 };
 
-const envPlugin: FastifyPluginCallback = (fastify, opts, done) => {
+const envPlugin: FastifyPluginCallback = (fastify, _, done) => {
   const configOptions: FastifyEnvOptions = {
     schema: schema,
     dotenv: true,
