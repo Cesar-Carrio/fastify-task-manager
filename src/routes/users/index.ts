@@ -18,7 +18,7 @@ const plugin: FastifyPluginCallbackTypebox = async (fastify) => {
     },
     async () => {
       return {
-        users: [1, 2, 3],
+        users: [2, 3],
       };
     },
   );
