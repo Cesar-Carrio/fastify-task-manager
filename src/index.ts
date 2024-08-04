@@ -30,6 +30,11 @@ const app: FastifyPluginAsync<AppOptions> = async (
   fastify.register(SwaggerUI);
   fastify.register(Helmet, { global: true });
 
+  void fastify.register(Autoload, {
+    dir: join(__dirname, "routes"),
+    dirNameRoutePrefix: false,
+  });
+
   // Load all plugins in the plugins directory
   void fastify.register(Autoload, {
     dir: join(__dirname, "plugins"),
