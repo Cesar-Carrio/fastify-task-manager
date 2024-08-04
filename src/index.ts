@@ -1,6 +1,7 @@
 import Swagger from "@fastify/swagger";
 import SwaggerUI from "@fastify/swagger-ui";
 import Helmet from "@fastify/helmet";
+import cors from "@fastify/cors";
 
 import Autoload, { AutoloadPluginOptions } from "@fastify/autoload";
 import { FastifyPluginAsync } from "fastify";
@@ -28,6 +29,11 @@ const app: FastifyPluginAsync<AppOptions> = async (
   await fastify.register(envPlugin);
   fastify.register(Swagger);
   fastify.register(SwaggerUI);
+  fastify.register(cors, {
+    origin: "localhost",
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    allowedHeaders: ["Origin", "Content-Type", "Authorization"],
+  });
   fastify.register(Helmet, { global: true });
 
   void fastify.register(Autoload, {
